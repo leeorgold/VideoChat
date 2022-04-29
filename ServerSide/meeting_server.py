@@ -27,7 +27,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # server.setblocking(0)
 
 # Bind the socket to the port
-server_address = ('localhost', 10000)
+server_address = ('127.0.0.1', 10000)
 print(f'starting server on {server_address[0]}:{server_address[1]}')
 server.bind(server_address)
 server.listen(3)
