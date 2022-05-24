@@ -16,8 +16,11 @@ def is_participant_exists(ip):
 def output_data():
     output = {}
     for s, participant in participants.items():
-        output[participant.name] = participant.image_handler.frame
+        output[participant.name] = participant.image_handler.frame.decode()
     return output
+
+
+
 
 
 participants = {}
@@ -27,7 +30,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # server.setblocking(0)
 
 # Bind the socket to the port
-server_address = ('localhost', 10000)
+server_address = ('192.168.0.114', 9999)
 print(f'starting server on {server_address[0]}:{server_address[1]}')
 server.bind(server_address)
 server.listen(3)
@@ -56,6 +59,7 @@ while inputs:
             # participants.append(Participant(client_address))
             # connection.setblocking(False)
             inputs.append(connection)
+            outputs.append(connection)
 
             part = is_participant_exists(client_address[0])
             participants[connection] = part
@@ -68,47 +72,24 @@ while inputs:
                 participants[s].image_handler.handle()
             except Exception as e:
                 raise e
-                # # Interpret empty result as closed connection
-                # print(f'closing {s.getpeername} after reading no data')
-                # # Stop listening for input on the connection
-                # if s in outputs:
-                #     outputs.remove(s)
-                # inputs.remove(s)
-                # image_handlers.pop(s)
-                # s.close()
-                #
-                # # Remove message queue
-                # del message_queues[s]
+
 
     # Handle outputs
     output = output_data()
     for s in writable:
         copy = output.copy()
         copy.pop(participants[s].name)
-        try:
-            # next_msg = message_queues[s].get_nowait()
-            s.sendall(json.dumps(copy).encode())
-        except Exception as e:
-            raise e
-        # except queue.Empty:
-        #     # No messages waiting so stop checking for writability.
-        #     print(f'output queue for {s.getpeername()} is empty')
-        #     outputs.remove(s)
-        # else:
-        #     print(f'sending "{next_msg}" to {s.getpeername()}')
-        #     s.send(next_msg)
+        if copy:
+            try:
+                # s.sendall(f'{len(message := json.dumps(copy).encode())}'.encode())
+                s.sendall(json.dumps(copy).encode())
+            except Exception as e:
+                raise e
+
 
     # Handle "exceptional conditions"
     for s in exceptional:
-        # print(f'handling exceptional condition for {s.getpeername()}')
-        # # Stop listening for input on the connection
-        # inputs.remove(s)
-        # if s in outputs:
-        #     outputs.remove(s)
-        # participants.pop(s)
-        # s.close()
-        # # Remove message queue
-        # del message_queues[s]
+
         del participants[s].image_handler
         participants.pop(s)
         s.close()

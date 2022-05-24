@@ -18,11 +18,13 @@
 #     return Thread(target=f, daemon=True).start
 
 from server_image_handler import ServerImageHandler
-
+from itertools import count
 
 class Participant:
+    counter = count()
+
     def __init__(self, ip_address: str):
-        self.name = 'temp'
+        self.name = f'temp{next(self.counter)}'
         self.ip_address = ip_address
         self.image_handler: ServerImageHandler = None
 
