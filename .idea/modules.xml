@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Video Chat.iml" filepath="$PROJECT_DIR$/.idea/Video Chat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/VideoChat.iml" filepath="$PROJECT_DIR$/.idea/VideoChat.iml" />
     </modules>
   </component>
 </project>

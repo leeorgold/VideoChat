@@ -7,9 +7,10 @@ from tkinter.messagebox import showinfo
 def run_register_page():
     from home_page import run_home_page
     from login_page import run_login_page
+    from authentication_page import run_auth_page
 
     canvas.delete('all')
-    exit_button = tk.Button(canvas, image=exit_button_img, command=root.destroy, bd=0)
+    exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
     exit_button.pack()
     canvas.create_window(x - 24, 15, window=exit_button)
     canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)
@@ -32,10 +33,16 @@ def run_register_page():
         phone_number = register_phone_number_entry.get()
         email = register_email_entry.get()
 
-        if dc.username(username) and dc.password(password, confirm_password) and dc.phone(phone_number) and dc.email(
+        if dc.meeting_id(username) and dc.password(password, confirm_password) and dc.phone(phone_number) and dc.email(
                 email):
             client_socket.send(msg_builder.register(username=username, password=password, phone=phone_number, email=email).encode())
-            showinfo('server says:', client_socket.recv(1024))
+            msg = client_socket.recv(int(client_socket.recv(8)))
+            worked, details = msg_builder.handle_message('register', msg)
+            if not worked:
+                showinfo('Failure', details)
+            else:
+                my_username[0] = username
+                run_auth_page()
 
     # canvas.create_image(x - 50, 20, image=logo, anchor=tk.NE)
 

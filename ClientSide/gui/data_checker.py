@@ -74,6 +74,25 @@ class DataChecker:
             return False
         return True
 
+    @classmethod
+    def auth_code(cls, code: str):
+        if len(code) != 6 or not code.isascii() or not code.isdigit():
+            msgbox.showwarning('Invalid code', 'You must enter a 6 digit code')
+            return False
+        return True
+
+    @classmethod
+    def meeting_id(cls, meeting_id: str):
+
+        if len(meeting_id) != 8:
+            msgbox.showwarning('Invalid ID', 'Meeting IDs must contain 8 english characters')
+            return False
+        meeting_id = meeting_id.lower()
+        if not (meeting_id.isalpha() and meeting_id.isascii()):
+            msgbox.showwarning('Invalid ID', 'Meeting IDs must contain english letters only')
+            return False
+        return True
+
 
 # print(DataChecker.email('gold.leeor2004@gmail.com'))
 # print(DataChecker.email('leeorgo129@amirim.edum.org.il'))

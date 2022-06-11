@@ -1,47 +1,141 @@
 import json
 import re
-from DataBase.database import Users
+from DataBase.database import Users, random_string
+from client import Client, logged_users
+from smtp import send_code
+from meeting import Meeting, meetings
 
 _REQUEST = 'request'
 _PARAMETERS = 'parameters'
 _SESSION = 'session'
+_DETAILS = 'details'
+
+auth_codes = {}
+functions = {}
 
 
-def handle_message(msg):
+def handle_message(sock, msg):
     try:
         msg = json.loads(msg)
     except json.decoder.JSONDecodeError:
-        return False, 'Not a json data'
+        return build_message(False, {_DETAILS: 'Not a json data'})
 
     if not (req := msg.get(_REQUEST)):
-        return False, 'No request'
+        return build_message(False, {_DETAILS: 'No request'})
 
     if req not in _valid_requests:
-        return False, 'Not a valid request'
+        return build_message(False, {_DETAILS: 'Not a valid request'})
 
     if (kwargs := msg.get(_PARAMETERS)) is None:
-        return False, 'No parameters'
+        return build_message(False, {_DETAILS: 'No parameters'})
 
     try:
-        return _valid_requests[req](**kwargs)
+        return _valid_requests[req](sock, **kwargs)
     except Exception as e:
         print(e)
-        return False, 'Some error occurred'
+        return build_message(False, {_DETAILS: 'Some error occurred'})
 
 
-def register(*, username, password, phone, email):
-    if username_ok(username) and password_ok(password) and phone_ok(phone) and email_ok(email):
-        return Users.insert_user(username, password, phone, email)
-    return False, 'Illegal data'
+def register(sock, *, username, password, phone, email):
+    if not (username_ok(username) and password_ok(password) and phone_ok(phone) and email_ok(email)):
+        return build_message(False, {_DETAILS: 'Illegal data'})
+    can = Users.can_insert_user(username, password, phone, email)
+    if not can[0]:
+        return build_message(can[0], {_DETAILS: can[1]})
+
+    token = random_string(16, 16)
+    while token in auth_codes.keys():
+        token = random_string(16, 16)
+    # auth_codes[token] = '123456'
+    auth_codes[token] = send_code(email)
+    functions[token] = {'func': inserting_user, 'args': (username, password, phone, email)}
+    return build_message(True, {'token': token})
 
 
-def login(*, username, password):
-    if username_ok(username) and password_ok(password):
-        return Users.try_login(username, password)
-    return False, 'Illegal data'
+def search_logged_user(*, username=None, ip=None):
+    if username:
+        for session, client in logged_users.items():
+            if username == client.username:
+                return session
+    if ip:
+        for session, client in logged_users.items():
+            if ip == client.ip:
+                return session
+
+    return None
 
 
-_valid_requests = {'register': register, 'login': login}
+def log_user(session, username, email, sock):
+    if search_logged_user(username=username):
+        return build_message(False, {_DETAILS: 'User already logged in.'})
+    logged_users[session] = Client(username, email, sock.getpeername()[0])
+    return build_message(True, {_SESSION: session})
+
+
+def inserting_user(sock, username, password, phone, email):
+    worked, session = Users.insert_user(username, password, phone, email)
+    if not worked:
+        return build_message(worked, {_DETAILS: session})
+
+    return log_user(session, username, email, sock)
+
+
+def login(sock, *, username, password):
+    if not (username_ok(username) and password_ok(password)):
+        return build_message(False, {_DETAILS: 'Illegal data'})
+    worked, session = Users.try_login(username, password)
+    if not worked:
+        return build_message(worked, {_DETAILS: session})
+    return log_user(session, username, Users.get_email(username), sock)
+
+
+def logout(sock, session):
+    if user := logged_users.get(session):
+        if meet := user.hosting:
+            meet.host = None
+            del meetings[meet.id]
+        del logged_users[session]
+
+
+def authenticate(sock, token, code):
+    if token not in auth_codes.keys():
+        return build_message(False, {_DETAILS: 'Token does not exist'})
+    if code != auth_codes.pop(token):
+        functions.pop(token)
+        return build_message(False, {_DETAILS: 'Wrong code'})
+    dic = functions.pop(token)
+    return dic['func'](*dic['args'])
+
+
+def start_meeting(sock, session, password):
+    if user := logged_users.get(session):
+        meet = Meeting(user, password)
+        user.hosting = meet
+        return build_message(True, {'meeting_id': meet.id})
+    return build_message(False, {_DETAILS: 'Session does not exist'})
+
+
+def join_meeting(sock, session, meeting_id, password):
+    if session not in logged_users.keys():
+        return build_message(False, {_DETAILS: 'Session does not exist'})
+    if (meet := meetings.get(meeting_id)) is None:
+        return build_message(False, {_DETAILS: 'Meeting does not exist'})
+    if meet.password != password:
+        return build_message(False, {_DETAILS: 'Wrong password'})
+    msg = build_message(True, {'ip': meet.ip})
+    meetings[meeting_id].host.hosting = None
+    del meetings[meeting_id]
+    return msg
+
+
+_valid_requests = {
+    'register': register,
+    'login': login,
+    'logout': logout,
+    'authenticate': authenticate,
+    'start_meeting': start_meeting,
+    'join_meeting': join_meeting
+}
 
 
 def username_ok(username: str):
@@ -59,6 +153,16 @@ def phone_ok(phone: str):
 
 def email_ok(email: str):
     return re.search(r"^[\w.]{2,}@([\w-]{2,}\.)+[\w-]{2,4}$", email) is not None
+
+
+def build_message(status, parameters):
+    msg = json.dumps(
+        {
+            'status': status,
+            'parameters': parameters
+        }
+    )
+    return str(len(msg)).zfill(8) + msg
 
 # print(handle_message(
 #     '{"request": "register", '

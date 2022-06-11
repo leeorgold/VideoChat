@@ -23,11 +23,26 @@ canvas.pack()
 MAIN_FONT = 'Cascadia Mono'
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host_ip = '192.168.0.107'  # paste your server ip address here
+host_ip = '192.168.0.109'
+# host_ip = '172.19.250.78'
 port = 10000
+
 client_socket.connect((host_ip, port))  # a tuple
 
 msg_builder = MessageBuilder()
+my_username = ['']
+
+
+def close_window():
+    try:
+        client_socket.send(msg_builder.logout().encode())
+    except ConnectionError:
+        pass
+    root.destroy()
+
+
+root.protocol('WM_DELETE_WINDOW', close_window)
+
 
 def foo():
     pass

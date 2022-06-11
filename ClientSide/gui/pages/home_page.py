@@ -5,12 +5,12 @@ def run_home_page():
     from login_page import run_login_page
     from register_page import run_register_page
     from welcome_page import run_welcome_page
-    from meeting import run_meeting
+    # from host_meeting_page import run_meeting
     from user_page import run_user_page
 
     canvas.delete('all')
 
-    exit_button = tk.Button(canvas, image=exit_button_img, command=root.destroy, bd=0)
+    exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
     exit_button.pack()
     canvas.create_window(x - 24, 15, window=exit_button)
     canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)
@@ -24,7 +24,7 @@ def run_home_page():
                                 activeforeground='white', bd=3, command=run_register_page)
     about_button = tk.Button(canvas, text="About", font=(MAIN_FONT, 45, 'italic bold'), bg='#15478F',
                              activebackground='#2060BD', fg='white',
-                             activeforeground='white', bd=3, command=run_meeting)
+                             activeforeground='white', bd=3, command=foo)
     back_button = tk.Button(canvas, text="Back", font=(MAIN_FONT, 35, 'italic bold'), bg='#15478F',
                             activebackground='#2060BD', fg='white',
                             activeforeground='white', bd=3, command=run_welcome_page)

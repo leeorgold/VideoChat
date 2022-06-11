@@ -10,9 +10,10 @@ def run_login_page():
     # from flipages.lobby import run_lobby
     # from flipages.home_page import run_home_page
     from register_page import run_register_page
+    from user_page import run_user_page
 
     canvas.delete('all')
-    exit_button = tk.Button(canvas, image=exit_button_img, command=root.destroy, bd=0)
+    exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
     # exit_button.pack()
     canvas.create_window(x - 24, 15, window=exit_button)
     canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)
@@ -25,7 +26,13 @@ def run_login_page():
 
         if dc.username(username) and dc.password(password):
             client_socket.send(msg_builder.login(username=username, password=password).encode())
-            showinfo('server says:', client_socket.recv(1024))
+            msg = client_socket.recv(int(client_socket.recv(8)))
+            worked, details = msg_builder.handle_message('login', msg)
+            if not worked:
+                showinfo('Failure', details)
+            else:
+                my_username[0] = username
+                run_user_page()
 
 
 

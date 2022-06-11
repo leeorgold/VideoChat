@@ -7,7 +7,7 @@ def run_welcome_page():
 
     canvas.delete('all')
 
-    exit_button = tk.Button(canvas, image=exit_button_img, command=root.destroy, bd=0)
+    exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
     # exit_button.pack()
     canvas.create_window(x - 24, 15, window=exit_button)
     canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)

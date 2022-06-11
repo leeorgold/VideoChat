@@ -41,6 +41,16 @@ class Users:
         return cls.__tableName
 
     @classmethod
+    def can_insert_user(cls, username, password, phone_number, email):
+        if cls.get_info(username=username):
+            return False, 'username already taken'
+        if cls.get_info(phone_number=phone_number):
+            return False, 'phone number already taken'
+        if cls.get_info(email=email):
+            return False, 'email already taken'
+        return True, None
+
+    @classmethod
     def insert_user(cls, username, password, phone_number, email):
         """Gets a new user's data and adds it to the database."""
 
@@ -163,6 +173,10 @@ class Users:
             session = random_string(16, 16)
         return session
 
+    @classmethod
+    def get_email(cls, username):
+        return cls.get_info(username=username)[4]
+
 
 def random_string(a, b):
     all_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!@#$%^&*()?'
@@ -179,7 +193,8 @@ def main():
     # print(Users.try_login('user1', 'pass1'))
     # print(Users.try_login('user3', 'pass3'))
     # print(Users.get_search_query(username='user', phone_number='email'))
-    Users.set_session('user1', True)
+    # Users.set_session('user1', True)
+    print(Users.get_email('user1'))
 
 
 if __name__ == '__main__':
