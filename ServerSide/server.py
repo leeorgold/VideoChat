@@ -59,7 +59,7 @@ while inputs:
             # A "readable" server socket is ready to accept a connection
             connection, client_address = s.accept()
             print(f'new connection from {client_address}')
-            connection.setblocking(False)
+            # connection.setblocking(False)
             inputs.append(connection)
             em.encryption_dict[connection] = em.EncryptionManger(connection)
 
@@ -68,21 +68,26 @@ while inputs:
         else:
             try:
                 msg = em.encryption_dict[s].recv()
+                if msg is None:
+                    raise ConnectionError
+
                 print(f'[{s.getpeername()} -> server]: {msg!r}')
                 if msg == b'<SYMMETRIC KEY EXCHANGE>':
                     continue
+
                 # A readable client socket has data
                 # print(f'received "{data}" from {s.getpeername()}')
                 if (output := handle_message(s, msg)) is not None:
-                    message_queues[s].put(output)
-                    # Add output channel for response
-                    if s not in outputs:
-                        outputs.append(s)
+                    if output:
+                        message_queues[s].put(output)
+                        # Add output channel for response
+                        if s not in outputs:
+                            outputs.append(s)
                 else:
                     # Interpret empty result as closed connection
                     # print(f'closing {client_address} after reading no data')
                     # Stop listening for input on the connection
-                    connection_lost(s)
+                    raise ConnectionError
 
             except ConnectionError:
                 connection_lost(s)

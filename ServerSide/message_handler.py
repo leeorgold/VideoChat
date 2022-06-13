@@ -95,6 +95,7 @@ def logout(sock, session):
             meet.host = None
             del meetings[meet.id]
         del logged_users[session]
+    return False
 
 
 def authenticate(sock, token, code):
@@ -104,7 +105,7 @@ def authenticate(sock, token, code):
         functions.pop(token)
         return build_message(False, {_DETAILS: 'Wrong code'})
     dic = functions.pop(token)
-    return dic['func'](*dic['args'])
+    return dic['func'](sock, *dic['args'])
 
 
 def start_meeting(sock, session, password):

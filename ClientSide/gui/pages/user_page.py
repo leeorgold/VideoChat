@@ -6,6 +6,7 @@ def logout():
     client_socket.send(msg_builder.logout().encode())
     msg_builder.set_session(None)
     my_username[0] = ''
+    # reset_encryption_manager()
     run_welcome_page()
 
 

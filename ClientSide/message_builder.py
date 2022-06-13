@@ -1,6 +1,7 @@
 import json
 
 
+
 class MessageBuilder:
 
     def __init__(self):
@@ -103,6 +104,7 @@ class MessageBuilder:
         msg = self._format()
         msg[self._REQUEST] = 'logout'
         msg = json.dumps(msg)
+
         return msg
 
     def authenticate(self, code):

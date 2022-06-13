@@ -17,6 +17,7 @@ class EncryptionManger:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((ip, port))
         self.aes_key = get_random_bytes(24)
+        print(self.aes_key)
         self.send_key()
 
     def send_key(self):

@@ -22,7 +22,7 @@ def run_auth_page():
 
         if dc.auth_code(code):
             client_socket.send(msg_builder.authenticate(code).encode())
-            msg = client_socket.recv(int(client_socket.recv(8)))
+            msg = client_socket.recv()
             worked, details = msg_builder.handle_message('authenticate', msg)
             if not worked:
                 showinfo('Failure', details)

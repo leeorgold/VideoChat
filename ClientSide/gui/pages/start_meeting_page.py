@@ -22,7 +22,7 @@ def run_meeting_password_page():
 
         if dc.password(password):
             client_socket.send(msg_builder.start_meeting(password).encode())
-            msg = client_socket.recv(int(client_socket.recv(8)))
+            msg = client_socket.recv()
             worked, details = msg_builder.handle_message('start_meeting', msg)
             if not worked:
                 showinfo('Failure', details)

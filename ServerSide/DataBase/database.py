@@ -1,6 +1,7 @@
 import sqlite3
 import random
 from hashlib import sha256
+import os
 
 # this makes sure that 'videochat.db' is created in this directory.
 FILE_PATH = __file__ + '\\..\\videochat.db'
@@ -20,7 +21,7 @@ class Users:
     __email = "email"
     __salt = "salt"
     __session = 'session'
-    __PEPPER = "J9L^O5ZCsxQr7T4H"
+    __PEPPER = os.getenv('PEPPER')
 
     conn = sqlite3.connect(FILE_PATH)
     # print("Opened database successfully:)")

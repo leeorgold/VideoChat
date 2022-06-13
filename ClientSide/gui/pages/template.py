@@ -24,12 +24,17 @@ canvas.pack()
 MAIN_FONT = 'Cascadia Mono'
 
 # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_ip = '192.168.0.107'
+
+server_ip = '192.168.0.109'
 # server_ip = '172.19.250.78'
 port = 10000
+
 #
 # client_socket.connect((host_ip, port))  # a tuple
 client_socket = EncryptionManger(ip=server_ip, port=port)
+
+
+# reset_encryption_manager()
 
 msg_builder = MessageBuilder()
 my_username = ['']

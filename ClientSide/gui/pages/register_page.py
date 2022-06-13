@@ -33,10 +33,10 @@ def run_register_page():
         phone_number = register_phone_number_entry.get()
         email = register_email_entry.get()
 
-        if dc.meeting_id(username) and dc.password(password, confirm_password) and dc.phone(phone_number) and dc.email(
+        if dc.username(username) and dc.password(password, confirm_password) and dc.phone(phone_number) and dc.email(
                 email):
             client_socket.send(msg_builder.register(username=username, password=password, phone=phone_number, email=email).encode())
-            msg = client_socket.recv(int(client_socket.recv(8)))
+            msg = client_socket.recv()
             worked, details = msg_builder.handle_message('register', msg)
             if not worked:
                 showinfo('Failure', details)

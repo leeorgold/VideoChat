@@ -19,18 +19,20 @@ class EncryptionManger:
         else:
             return self.recv_aes()
 
-    def recv_rsa(self) -> bytes:
+    def recv_rsa(self):
         msg = self._rsa_decryption(self.sock.recv(256))
         if len(msg) != 24:
             return None
         return msg
 
-    def recv_aes(self) -> bytes:
+    def recv_aes(self):
         try:
-            length = int(self.sock.recv(8))
+            length = int(self.sock.recv(8).decode())
             msg = self.sock.recv(length)
             return self._aes_decryption(msg)
-        except ValueError:
+        # except (ValueError, BlockingIOError) as e:
+        except (ValueError,) as e:
+            print(e)
             return None
 
     def send_aes(self, data: bytes) -> None:

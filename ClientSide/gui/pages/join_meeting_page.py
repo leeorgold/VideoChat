@@ -22,7 +22,7 @@ def run_join_meeting_page():
 
         if dc.meeting_id(meeting_id) and dc.password(password):
             client_socket.send(msg_builder.join_meeting(meeting_id=meeting_id, password=password).encode())
-            msg = client_socket.recv(int(client_socket.recv(8)))
+            msg = client_socket.recv()
             worked, details = msg_builder.handle_message('join_meeting', msg)
             if not worked:
                 showinfo('Failure', details)

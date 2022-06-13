@@ -325,22 +325,24 @@ def image_connection(mode, ip=None):
                     image_udp.sendto(b'hello client', addr)
                     break
 
+    image_udp.settimeout(None)
+
     return image_udp, addr
 
 
 def handle_threads(mode, ip):
-    def on_off_camera():
-        global camera_switch
-        # nonlocal vid
-
-        if camera_switch:
-            camera_switch = False
-            my_image_container.turn_off_image()
-            # vid.release()
-        else:
-            camera_switch = True
-            # my_image_container
-            # vid = cv2.VideoCapture(0)
+    # def on_off_camera():
+    #     global camera_switch
+    #     # nonlocal vid
+    #
+    #     if camera_switch:
+    #         camera_switch = False
+    #         my_image_container.turn_off_image()
+    #         # vid.release()
+    #     else:
+    #         camera_switch = True
+    #         # my_image_container
+    #         # vid = cv2.VideoCapture(0)
 
 
     msg = canvas.create_text(200, y // 2 - 10, text="",
@@ -358,10 +360,10 @@ def handle_threads(mode, ip):
     run_thread(image_sender, img_sock, vid, user_address)
     run_thread(image_receiver, img_sock, user_address)
 
-    image_button = tk.Button(canvas, text="Turn on/off\nmy camera", font=(MAIN_FONT, 35, 'bold italic'), bg='#15478F',
-                             activebackground='#2060BD', fg='white',
-                             activeforeground='white', bd=3, command=on_off_camera)
-    canvas.create_window(x - 2, y - 180, anchor=tk.E, window=image_button)
+    # image_button = tk.Button(canvas, text="Turn on/off\nmy camera", font=(MAIN_FONT, 35, 'bold italic'), bg='#15478F',
+    #                          activebackground='#2060BD', fg='white',
+    #                          activeforeground='white', bd=3, command=on_off_camera)
+    # canvas.create_window(x - 2, y - 180, anchor=tk.E, window=image_button)
 
     audio = pyaudio.PyAudio()
     run_thread(audio_receiver, audio, audio_sock)
@@ -420,12 +422,13 @@ def image_sender(sock, vid, addr):
 
     while vid.isOpened():
         read_successfully, frame = vid.read()
-        if not camera_switch:
-            time.sleep(1)
-        elif read_successfully:
+        # if not camera_switch:
+        #     time.sleep(1)
+        if read_successfully:
+        # elif read_successfully:
             # saves a reference to the image
             my_image_container.img = frame
-            my_image_container.turned_off1 = my_image_container.turned_off2 = False
+            # my_image_container.turned_off1 = my_image_container.turned_off2 = False
             # resizing the image
             # frame = imutils.resize(frame, width=400)
             # compress image data formats in order to make network transfer easier
@@ -447,19 +450,29 @@ def image_receiver(sock: socket.socket, addr):
     :addr - the other client address"""
 
     while True:
-        try:
+        # try:
+        #     # receives a packet
+        #     packet, received_addr = sock.recvfrom(BUFF_SIZE)
+        #     # if the packet received from the other client IP address and port
+        #     if addr == received_addr:
+        #         # converts the received bytes to a numpy array
+        #         npdata = np.frombuffer(packet, dtype=np.uint8)
+        #         # converts the numpy array to an image
+        #         frame = cv2.imdecode(npdata, cv2.IMREAD_COLOR)
+        #         # saves a reference to the image
+        #         other_image_container.img = frame
+        # except socket.timeout:
+        #     other_image_container.turn_off_image()
             # receives a packet
-            packet, received_addr = sock.recvfrom(BUFF_SIZE)
-            # if the packet received from the other client IP address and port
-            if addr == received_addr:
-                # converts the received bytes to a numpy array
-                npdata = np.frombuffer(packet, dtype=np.uint8)
-                # converts the numpy array to an image
-                frame = cv2.imdecode(npdata, cv2.IMREAD_COLOR)
-                # saves a reference to the image
-                other_image_container.img = frame
-        except socket.timeout:
-            other_image_container.turn_off_image()
+        packet, received_addr = sock.recvfrom(BUFF_SIZE)
+        # if the packet received from the other client IP address and port
+        if addr == received_addr:
+            # converts the received bytes to a numpy array
+            npdata = np.frombuffer(packet, dtype=np.uint8)
+            # converts the numpy array to an image
+            frame = cv2.imdecode(npdata, cv2.IMREAD_COLOR)
+            # saves a reference to the image
+            other_image_container.img = frame
 
 
 
@@ -471,13 +484,17 @@ def update_photos():
     other_image_container.update()
 
     # displaying the changes to the screen
-    if my_image_container.turned_off1 and not my_image_container.turned_off2:
-        canvas.create_image(500, 700, image=my_image_container.img)
-        my_image_container.turned_off2 = True
 
-    if other_image_container.turned_off1 and not other_image_container.turned_off2:
-        canvas.create_image(500, 700, image=other_image_container.img)
-        other_image_container.turned_off2 = True
+    canvas.create_image(500, 700, image=my_image_container.img)
+    canvas.create_image(1400, 700, image=other_image_container.img)
+
+    # if my_image_container.turned_off1 and not my_image_container.turned_off2:
+    #     canvas.create_image(500, 700, image=my_image_container.img)
+    #     my_image_container.turned_off2 = True
+    #
+    # if other_image_container.turned_off1 and not other_image_container.turned_off2:
+    #     canvas.create_image(500, 700, image=other_image_container.img)
+    #     other_image_container.turned_off2 = True
 
     # calling this function again after 10 milliseconds to update the screen again
     canvas.after(10, update_photos)
@@ -511,9 +528,10 @@ class ImageContainer:
         self._received is used to save a reference to a new image.
         self._displayed is used to save a reference to the TK image displayed on the canvas."""
         self._received = None
-        self._displayed = self.no_image
-        self.turned_off1 = True
-        self.turned_off2 = False
+        self._displayed = None
+        # self._displayed = self.no_image
+        # self.turned_off1 = True
+        # self.turned_off2 = False
 
     @property
     def img(self):
@@ -531,15 +549,15 @@ class ImageContainer:
             # converts to BGR because PhotoImage works with BGR format only.
             self._displayed = ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(self._received, cv2.COLOR_RGB2BGR)))
 
-    def turn_off_image(self):
-        self._displayed = self.no_image
-        self._received = None
-        self.turned_off1 = True
+    # def turn_off_image(self):
+    #     self._displayed = self.no_image
+    #     self._received = None
+    #     self.turned_off1 = True
 
 
 # creating the containers
 my_image_container = ImageContainer()
 other_image_container = ImageContainer()
 
-my_image_container.turn_off_image()
-other_image_container.turn_off_image()
+# my_image_container.turn_off_image()
+# other_image_container.turn_off_image()
