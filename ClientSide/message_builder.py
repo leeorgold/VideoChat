@@ -66,7 +66,7 @@ class MessageBuilder:
             elif (details := parm.get('details')) is not None:
                 return False, details
 
-        elif req == 'register':
+        elif req == 'get_token':
             if status:
                 if token := parm.get('token'):
                     self.token = token
@@ -80,7 +80,7 @@ class MessageBuilder:
             if status:
                 if session := parm.get('session'):
                     self.__session = session
-                    return True, ''
+                return True, ''
             elif (details := parm.get('details')) is not None:
                 return False, details
 
@@ -131,6 +131,22 @@ class MessageBuilder:
         msg = json.dumps(msg)
         return msg
 
+    def forgot_password(self, username, email):
+        msg = self._format()
+        msg[self._REQUEST] = 'forgot_password'
+        msg[self._PARAMETERS] = {
+            'username': username,
+            'email': email
+        }
+        msg = json.dumps(msg)
+        return msg
+
+    def reset_password(self, password):
+        msg = self._format()
+        msg[self._REQUEST] = 'reset_password'
+        msg[self._PARAMETERS]['password'] = password
+        msg = json.dumps(msg)
+        return msg
 
 # print(MessageBuilder().register(username='user1', password='pass1', phone='0501234567', email='email@gmail.com'))
 # print(MessageBuilder().meet_pass('123'))

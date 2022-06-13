@@ -4,14 +4,14 @@ from ClientSide.gui.data_checker import DataChecker as dc
 from tkinter.messagebox import showinfo
 
 
-def run_auth_page():
+def run_auth_page(mode):
     from home_page import run_home_page
     from user_page import run_user_page
     from register_page import run_register_page
+    from forgot_password_page import run_forgot_password_page
 
     canvas.delete('all')
     exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
-    # exit_button.pack()
     canvas.create_window(x - 24, 15, window=exit_button)
     canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)
 
@@ -27,9 +27,15 @@ def run_auth_page():
             if not worked:
                 showinfo('Failure', details)
                 my_username[0] = ''
-                run_register_page()
-            else:
-                run_user_page()
+                if mode == 'register':
+                    run_register_page()
+                elif mode == 'forgot_password':
+                    run_forgot_password_page()
+                elif mode == 'reset_password':
+                    run_forgot_password_page()
+            elif mode == 'reset_password':
+                showinfo('Success', 'Password changed successfully.')
+            run_user_page()
 
     auth_button = tk.Button(canvas, text="authenticate", font=(MAIN_FONT, 32, 'bold italic'), bg='#15478F',
                              activebackground='#2060BD', fg='white',

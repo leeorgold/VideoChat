@@ -39,4 +39,4 @@ class Client:
 #         return self[key]
 
 
-logged_users : dict[str, Client] = {}
+logged_users: dict[str, Client] = {}

@@ -1,11 +1,11 @@
+from dotenv import load_dotenv
+load_dotenv()
 import select
 import socket
 from message_handler import handle_message, search_logged_user, logout
 import queue
 from client import logged_users
 from meeting import meetings
-from dotenv import load_dotenv
-load_dotenv()
 import encryption_manger as em
 
 

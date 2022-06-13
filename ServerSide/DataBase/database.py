@@ -20,7 +20,7 @@ class Users:
     __phone_number = "phoneNumber"
     __email = "email"
     __salt = "salt"
-    __session = 'session'
+    # __session = 'session'
     __PEPPER = os.getenv('PEPPER')
 
     conn = sqlite3.connect(FILE_PATH)
@@ -29,8 +29,7 @@ class Users:
                 f"{__password} TEXT NOT NULL, " \
                 f"{__salt} TEXT NOT NULL, " \
                 f"{__phone_number} TEXT NOT NULL UNIQUE, " \
-                f"{__email} TEXT NOT NULL UNIQUE," \
-                f"{__session} TEXT UNIQUE);"
+                f"{__email} TEXT NOT NULL UNIQUE);"
 
     conn.execute(query_str)
     # print("Table created successfully")
@@ -42,7 +41,7 @@ class Users:
         return cls.__tableName
 
     @classmethod
-    def can_insert_user(cls, username, password, phone_number, email):
+    def can_insert_user(cls, username, phone_number, email):
         if cls.get_info(username=username):
             return False, 'username already taken'
         if cls.get_info(phone_number=phone_number):
@@ -57,31 +56,26 @@ class Users:
 
         conn = sqlite3.connect(FILE_PATH)
 
-        session = cls.get_new_session()
+        # session = cls.get_new_session()
         insert_query = f"INSERT INTO {cls.__tableName} ({cls.__username}, {cls.__password},{cls.__salt}," \
-                       f" {cls.__phone_number}, {cls.__email}, {cls.__session}) VALUES (?, ?, ?, ?, ?, ?);"
+                       f" {cls.__phone_number}, {cls.__email}) VALUES (?, ?, ?, ?, ?);"
         password, salt = cls.encrypt_password(password)
-        values = (username, password, salt, phone_number, email, session)
+        values = (username, password, salt, phone_number, email)
         try:
             conn.execute(insert_query, values)
             conn.commit()
             conn.close()
         except sqlite3.IntegrityError:
-            if cls.get_info(username=username):
-                return False, 'username already taken'
-            if cls.get_info(phone_number=phone_number):
-                return False, 'phone number already taken'
-            if cls.get_info(email=email):
-                return False, 'email already taken'
+            return False
         else:
-            return True, session
+            return True
 
     @classmethod
     def update_user_password_by_username(cls, username, password):
         """Gets user's id and new password. The function updates the user's password.
         *NOTE: If the user id is not in the database, or if the password is None, the function does nothing."""
 
-        if password is not None:
+        try:
             hashed, salt = cls.encrypt_password(password)
             conn = sqlite3.connect(FILE_PATH)
             query = f"UPDATE {cls.__tableName} SET {cls.__password} = ?, {cls.__salt} = ? WHERE {cls.__username} = ?;"
@@ -89,8 +83,9 @@ class Users:
             conn.commit()
             conn.close()
             # print("password updated successfully")
-        else:
-            print("password did not changed. password must not be None.")
+            return True
+        except Exception:
+            return False
 
     @classmethod
     def encrypt_password(cls, password: str, salt=None):
@@ -127,11 +122,6 @@ class Users:
     def get_search_query(cls, **kwargs):
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         assert bool(kwargs), "No data was given"
-        # column_names = {'username': cls.__username,
-        #                 'password': cls.__password,
-        #                 'phone_number': cls.__phoneNumber,
-        #                 'email': cls.__email,
-        #                 'session': cls.__session}
 
         query = f"SELECT * FROM {cls.__tableName} WHERE "
         values = []
@@ -152,27 +142,27 @@ class Users:
         hashed_input = cls.encrypt_password(password, salt=real_salt)[0]
 
         if real_hashed == hashed_input:
-            return True, cls.set_session(username)
+            return True, ''
         return False, 'wrong password'
 
-    @classmethod
-    def set_session(cls, username, clear=False):
-        conn = sqlite3.connect(FILE_PATH)
-        query = f"UPDATE {cls.__tableName} SET {cls.__session} = ? WHERE {cls.__username} = ?;"
-        session = None if clear else cls.get_new_session()
-        conn.execute(query, (session, username))
-        conn.commit()
-        conn.close()
-        return session
+    # @classmethod
+    # def set_session(cls, username, clear=False):
+    #     conn = sqlite3.connect(FILE_PATH)
+    #     query = f"UPDATE {cls.__tableName} SET {cls.__session} = ? WHERE {cls.__username} = ?;"
+    #     session = None if clear else cls.get_new_session()
+    #     conn.execute(query, (session, username))
+    #     conn.commit()
+    #     conn.close()
+    #     return session
 
-    @classmethod
-    def get_new_session(cls):
-        session = random_string(16, 16)
-        conn = sqlite3.connect(FILE_PATH)
-        query = f"SELECT * FROM {cls.__tableName} WHERE {cls.__session} = ?;"
-        while conn.execute(query, (session,)).fetchone():
-            session = random_string(16, 16)
-        return session
+    # @classmethod
+    # def get_new_session(cls):
+    #     session = random_string(16, 16)
+    #     conn = sqlite3.connect(FILE_PATH)
+    #     query = f"SELECT * FROM {cls.__tableName} WHERE {cls.__session} = ?;"
+    #     while conn.execute(query, (session,)).fetchone():
+    #         session = random_string(16, 16)
+    #     return session
 
     @classmethod
     def get_email(cls, username):

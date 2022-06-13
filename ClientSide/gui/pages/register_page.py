@@ -37,12 +37,12 @@ def run_register_page():
                 email):
             client_socket.send(msg_builder.register(username=username, password=password, phone=phone_number, email=email).encode())
             msg = client_socket.recv()
-            worked, details = msg_builder.handle_message('register', msg)
+            worked, details = msg_builder.handle_message('get_token', msg)
             if not worked:
                 showinfo('Failure', details)
             else:
                 my_username[0] = username
-                run_auth_page()
+                run_auth_page('register')
 
     # canvas.create_image(x - 50, 20, image=logo, anchor=tk.NE)
 

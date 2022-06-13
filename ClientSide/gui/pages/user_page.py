@@ -13,6 +13,7 @@ def logout():
 def run_user_page():
     from start_meeting_page import run_meeting_password_page
     from join_meeting_page import run_join_meeting_page
+    from reset_password import run_reset_password_page
 
     canvas.delete('all')
 
@@ -25,7 +26,7 @@ def run_user_page():
     change_password_button = tk.Button(canvas, text="Change password", font=(MAIN_FONT, 45, 'bold italic'),
                                        bg='#15478F',
                                        activebackground='#2060BD', fg='white',
-                                       activeforeground='white', bd=3, command=foo)
+                                       activeforeground='white', bd=3, command=run_reset_password_page)
     host_meeting_button = tk.Button(canvas, text="Start meeting", font=(MAIN_FONT, 40, 'italic bold'), bg='#15478F',
                                     activebackground='#2060BD', fg='white',
                                     activeforeground='white', bd=3, command=run_meeting_password_page)

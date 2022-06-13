@@ -32,22 +32,21 @@ def handle_message(sock, msg):
     try:
         return _valid_requests[req](sock, **kwargs)
     except Exception as e:
-        print(e)
         return build_message(False, {_DETAILS: 'Some error occurred'})
 
 
 def register(sock, *, username, password, phone, email):
     if not (username_ok(username) and password_ok(password) and phone_ok(phone) and email_ok(email)):
         return build_message(False, {_DETAILS: 'Illegal data'})
-    can = Users.can_insert_user(username, password, phone, email)
+    can = Users.can_insert_user(username, phone, email)
     if not can[0]:
         return build_message(can[0], {_DETAILS: can[1]})
 
     token = random_string(16, 16)
     while token in auth_codes.keys():
         token = random_string(16, 16)
-    # auth_codes[token] = '123456'
-    auth_codes[token] = send_code(email)
+    auth_codes[token] = '123456'
+    # auth_codes[token] = send_code(email)
     functions[token] = {'func': inserting_user, 'args': (username, password, phone, email)}
     return build_message(True, {'token': token})
 
@@ -65,28 +64,29 @@ def search_logged_user(*, username=None, ip=None):
     return None
 
 
-def log_user(session, username, email, sock):
+def log_user(sock, username, email):
     if search_logged_user(username=username):
         return build_message(False, {_DETAILS: 'User already logged in.'})
+    session = unique_str(logged_users.keys())
     logged_users[session] = Client(username, email, sock.getpeername()[0])
     return build_message(True, {_SESSION: session})
 
 
 def inserting_user(sock, username, password, phone, email):
-    worked, session = Users.insert_user(username, password, phone, email)
+    worked = Users.insert_user(username, password, phone, email)
     if not worked:
-        return build_message(worked, {_DETAILS: session})
+        return build_message(worked, {_DETAILS: 'Some Error occurred'})
 
-    return log_user(session, username, email, sock)
+    return log_user(sock, username, email)
 
 
 def login(sock, *, username, password):
     if not (username_ok(username) and password_ok(password)):
         return build_message(False, {_DETAILS: 'Illegal data'})
-    worked, session = Users.try_login(username, password)
+    worked, details = Users.try_login(username, password)
     if not worked:
-        return build_message(worked, {_DETAILS: session})
-    return log_user(session, username, Users.get_email(username), sock)
+        return build_message(worked, {_DETAILS: details})
+    return log_user(sock, username, Users.get_email(username))
 
 
 def logout(sock, session):
@@ -129,13 +129,46 @@ def join_meeting(sock, session, meeting_id, password):
     return msg
 
 
+def forgot_password(sock, username, email):
+    if not (username_ok(username) and email_ok(email)):
+        return build_message(False, {_DETAILS: 'Illegal data'})
+    if not Users.get_info(username=username, email=email):
+        return build_message(False, {_DETAILS: 'Wrong data'})
+
+    token = unique_str(auth_codes.keys())
+    auth_codes[token] = '123456'
+    # auth_codes[token] = send_code(email)
+    functions[token] = {'func': log_user, 'args': (username, email)}
+    return build_message(True, {'token': token})
+
+
+def reset_password(sock, session, password):
+    if user := logged_users.get(session):
+        token = unique_str(auth_codes.keys())
+        auth_codes[token] = '123456'
+        # auth_codes[token] = send_code(email)
+        functions[token] = {'func': change_password, 'args': (session, password)}
+        return build_message(True, {'token': token})
+    return build_message(False, {_DETAILS: 'Session does not exist'})
+
+
+def change_password(sock, session, password):
+    if user := logged_users.get(session):
+        if Users.update_user_password_by_username(user.username, password):
+            return build_message(True, {})
+        return build_message(False, {_DETAILS: 'Some error occurred'})
+    return build_message(False, {_DETAILS: 'Session does not exist'})
+
+
 _valid_requests = {
     'register': register,
     'login': login,
     'logout': logout,
     'authenticate': authenticate,
     'start_meeting': start_meeting,
-    'join_meeting': join_meeting
+    'join_meeting': join_meeting,
+    'forgot_password': forgot_password,
+    'reset_password': reset_password
 }
 
 
@@ -164,6 +197,13 @@ def build_message(status, parameters):
         }
     )
     return msg
+
+
+def unique_str(iterable):
+    st = random_string(16, 16)
+    while st in iterable:
+        st = random_string(16, 16)
+    return st
 
 # print(handle_message(
 #     '{"request": "register", '
