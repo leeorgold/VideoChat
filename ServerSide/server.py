@@ -4,6 +4,11 @@ from message_handler import handle_message, search_logged_user, logout
 import queue
 from client import logged_users
 from meeting import meetings
+from dotenv import load_dotenv
+load_dotenv()
+import encryption_manger as em
+
+
 
 # Create a TCP/IP socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,6 +41,7 @@ def connection_lost(s):
 
     # Remove message queue
     del message_queues[s]
+    del em.encryption_dict[s]
 
     logout(s, session)
 
@@ -55,23 +61,23 @@ while inputs:
             print(f'new connection from {client_address}')
             connection.setblocking(False)
             inputs.append(connection)
+            em.encryption_dict[connection] = em.EncryptionManger(connection)
 
             # Give the connection a queue for data we want to send
             message_queues[connection] = queue.Queue()
         else:
             try:
-                length = s.recv(8).decode()
-                if length:
-                    length = int(length)
-                    msg = s.recv(length).decode()
-                    print(f'[{s.getpeername()} -> server]: {msg!r}')
-                    # A readable client socket has data
-                    # print(f'received "{data}" from {s.getpeername()}')
-                    if (output := handle_message(s, msg)) is not None:
-                        message_queues[s].put(output)
-                        # Add output channel for response
-                        if s not in outputs:
-                            outputs.append(s)
+                msg = em.encryption_dict[s].recv()
+                print(f'[{s.getpeername()} -> server]: {msg!r}')
+                if msg == b'<SYMMETRIC KEY EXCHANGE>':
+                    continue
+                # A readable client socket has data
+                # print(f'received "{data}" from {s.getpeername()}')
+                if (output := handle_message(s, msg)) is not None:
+                    message_queues[s].put(output)
+                    # Add output channel for response
+                    if s not in outputs:
+                        outputs.append(s)
                 else:
                     # Interpret empty result as closed connection
                     # print(f'closing {client_address} after reading no data')
@@ -90,17 +96,12 @@ while inputs:
             # print(f'output queue for {s.getpeername()} is empty')
             outputs.remove(s)
         else:
-            print(f'[server -> {s.getpeername()}]: {next_msg[8:]!r}')
-            s.send(next_msg.encode())
+            print(f'[server -> {s.getpeername()}]: {next_msg!r}')
+            em.encryption_dict[s].send_aes(next_msg.encode())
 
     # Handle "exceptional conditions"
     for s in exceptional:
-        print(f'handling exceptional condition for {s.getpeername()}')
-        # Stop listening for input on the connection
-        inputs.remove(s)
-        if s in outputs:
-            outputs.remove(s)
-        s.close()
+        connection_lost(s)
         # Remove message queue
 
 # from threading import Thread

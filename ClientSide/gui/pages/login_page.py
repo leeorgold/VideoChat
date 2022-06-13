@@ -26,7 +26,7 @@ def run_login_page():
 
         if dc.username(username) and dc.password(password):
             client_socket.send(msg_builder.login(username=username, password=password).encode())
-            msg = client_socket.recv(int(client_socket.recv(8)))
+            msg = client_socket.recv()
             worked, details = msg_builder.handle_message('login', msg)
             if not worked:
                 showinfo('Failure', details)

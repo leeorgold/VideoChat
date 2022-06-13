@@ -28,7 +28,7 @@ class MessageBuilder:
             'email': email
         }
         msg = json.dumps(msg)
-        return f'{len(msg)}'.zfill(8) + msg
+        return msg
 
     def login(self, *, username, password):
         msg = self._format()
@@ -38,7 +38,7 @@ class MessageBuilder:
             'password': password
         }
         msg = json.dumps(msg)
-        return f'{len(msg)}'.zfill(8) + msg
+        return msg
 
     def handle_message(self, req, msg):
         try:
@@ -103,7 +103,7 @@ class MessageBuilder:
         msg = self._format()
         msg[self._REQUEST] = 'logout'
         msg = json.dumps(msg)
-        return f'{len(msg)}'.zfill(8) + msg
+        return msg
 
     def authenticate(self, code):
         msg = self._format()
@@ -112,14 +112,14 @@ class MessageBuilder:
         del self.token
         msg[self._PARAMETERS]['code'] = code
         msg = json.dumps(msg)
-        return f'{len(msg)}'.zfill(8) + msg
+        return msg
 
     def start_meeting(self, password):
         msg = self._format()
         msg[self._REQUEST] = 'start_meeting'
         msg[self._PARAMETERS]['password'] = password
         msg = json.dumps(msg)
-        return f'{len(msg)}'.zfill(8) + msg
+        return msg
 
     def join_meeting(self, meeting_id, password):
         msg = self._format()
@@ -127,7 +127,7 @@ class MessageBuilder:
         msg[self._PARAMETERS]['meeting_id'] = meeting_id
         msg[self._PARAMETERS]['password'] = password
         msg = json.dumps(msg)
-        return f'{len(msg)}'.zfill(8) + msg
+        return msg
 
 
 # print(MessageBuilder().register(username='user1', password='pass1', phone='0501234567', email='email@gmail.com'))

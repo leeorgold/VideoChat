@@ -18,13 +18,13 @@ def connecet_to_server_audio(host_ip, port):
     return sock, (host_ip, port)
 
 
-server_addr = ('192.168.0.109', 4444)
-sock, client_addr = connecet_to_server_audio(*server_addr)
+# server_addr = ('192.168.0.109', 4444)
+# sock, client_addr = connecet_to_server_audio(*server_addr)
 audio = pyaudio.PyAudio()
 
 
 def callback(in_data, frame_count, time_info, status):
-    sock.sendto(in_data, client_addr)
+    # sock.sendto(in_data, client_addr)
     return None, pyaudio.paContinue
 
 
@@ -58,4 +58,4 @@ def play():
 # audio.terminate()
 if __name__ == '__main__':
     record()
-    play()
+    # play()

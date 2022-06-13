@@ -162,7 +162,7 @@ def build_message(status, parameters):
             'parameters': parameters
         }
     )
-    return str(len(msg)).zfill(8) + msg
+    return msg
 
 # print(handle_message(
 #     '{"request": "register", '

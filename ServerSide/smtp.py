@@ -1,6 +1,10 @@
+import os
 import smtplib
 from email.message import EmailMessage
 import random
+# from dotenv import load_dotenv
+
+
 
 def get_6_digit_code():
     return str(random.randrange(1_000_000)).zfill(6)
@@ -11,7 +15,8 @@ def send_code(to: str):
     smtp_server = "smtp.office365.com"
 
     email_address = "cyberous@outlook.co.il"
-    email_password = "videochat2022"
+    email_password = os.getenv('EMAIL_PASSWORD')
+    print(email_password)
 
     msg = EmailMessage()
     auth = get_6_digit_code()
@@ -42,6 +47,3 @@ def send_code(to: str):
     return auth
 
 
-if __name__ == '__main__':
-    code = send_code('leeorgold123@gmail.com')
-    print(code)

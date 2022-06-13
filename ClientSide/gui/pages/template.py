@@ -2,6 +2,7 @@ import tkinter as tk
 # from PIL import Image, ImageTk
 import socket
 from ClientSide.message_builder import MessageBuilder
+from ClientSide.encryption_manger import EncryptionManger
 
 root = tk.Tk()
 root.title('cyberous')
@@ -22,12 +23,13 @@ canvas = tk.Canvas(root, height=y, width=x)
 canvas.pack()
 MAIN_FONT = 'Cascadia Mono'
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host_ip = '192.168.0.109'
-# host_ip = '172.19.250.78'
+# client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_ip = '192.168.0.107'
+# server_ip = '172.19.250.78'
 port = 10000
-
-client_socket.connect((host_ip, port))  # a tuple
+#
+# client_socket.connect((host_ip, port))  # a tuple
+client_socket = EncryptionManger(ip=server_ip, port=port)
 
 msg_builder = MessageBuilder()
 my_username = ['']

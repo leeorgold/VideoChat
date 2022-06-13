@@ -35,7 +35,7 @@ def install_packages(requirement_list):
 
 
 def main():
-    requirements = ['numpy', 'opencv-python', 'Pillow', 'imutils', 'pipwin']
+    requirements = ['numpy', 'opencv-python', 'Pillow', 'imutils', 'pipwin', 'python-dotenv']
     install_packages(requirements)
 
 
