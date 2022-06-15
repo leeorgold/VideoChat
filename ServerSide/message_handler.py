@@ -32,6 +32,9 @@ def handle_message(sock, msg):
     try:
         return _valid_requests[req](sock, **kwargs)
     except Exception as e:
+        print('------------------------------------------')
+        print('ERROR:', e)
+        print('------------------------------------------')
         return build_message(False, {_DETAILS: 'Some error occurred'})
 
 
@@ -110,6 +113,10 @@ def authenticate(sock, token, code):
 
 def start_meeting(sock, session, password):
     if user := logged_users.get(session):
+        if meet := user.hosting:
+            meet.host = None
+            if meet.id in meetings.keys():
+                del meetings[meet.id]
         meet = Meeting(user, password)
         user.hosting = meet
         return build_message(True, {'meeting_id': meet.id})
@@ -160,6 +167,16 @@ def change_password(sock, session, password):
     return build_message(False, {_DETAILS: 'Session does not exist'})
 
 
+def leave_meeting(sock, session):
+    if user := logged_users.get(session):
+        if meet := user.hosting:
+            meet.host = None
+            del meetings[meet.id]
+        user.hosting = None
+    return False
+
+
+
 _valid_requests = {
     'register': register,
     'login': login,
@@ -168,7 +185,8 @@ _valid_requests = {
     'start_meeting': start_meeting,
     'join_meeting': join_meeting,
     'forgot_password': forgot_password,
-    'reset_password': reset_password
+    'reset_password': reset_password,
+    'leave_meeting': leave_meeting
 }
 
 

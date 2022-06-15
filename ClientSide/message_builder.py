@@ -148,5 +148,11 @@ class MessageBuilder:
         msg = json.dumps(msg)
         return msg
 
+    def leave_meeting(self):
+        msg = self._format()
+        msg[self._REQUEST] = 'leave_meeting'
+        msg = json.dumps(msg)
+        return msg
+
 # print(MessageBuilder().register(username='user1', password='pass1', phone='0501234567', email='email@gmail.com'))
 # print(MessageBuilder().meet_pass('123'))

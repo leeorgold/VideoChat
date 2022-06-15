@@ -19,7 +19,8 @@ class Meeting:
         self.host = host
         self.ip = host.ip
         self.joiner = None
-        self.id = id_generator()
+        # self.id = id_generator()
+        self.id = 'aaaaaaaa'
         self.password = password
         meetings[self.id] = self
 

@@ -22,6 +22,7 @@ def install_packages(requirement_list):
             if should_install_requirement(requirement)
         ]
         if len(requirements) > 0:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", '--upgrade', 'pip'])
             subprocess.check_call([sys.executable, "-m", "pip", "install", *requirements])
         else:
             print("Requirements already satisfied.")

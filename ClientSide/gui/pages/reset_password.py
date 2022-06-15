@@ -9,13 +9,7 @@ def run_reset_password_page():
     from user_page import run_user_page
     from authentication_page import run_auth_page
 
-    canvas.delete('all')
-    exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
-    # exit_button.pack()
-    canvas.create_window(x - 24, 15, window=exit_button)
-    canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)
-
-    # canvas.create_image(x - 50, 20, image=logo, anchor=tk.NE)
+    clear_window()
 
     def check_data():
         pass1 = pass1_entry.get()
@@ -36,14 +30,14 @@ def run_reset_password_page():
 
     back_button = tk.Button(canvas, text="Back", font=(MAIN_FONT, 35, 'bold italic'), bg='#15478F',
                             activebackground='#2060BD', fg='white',
-                            activeforeground='white', bd=3, command=run_home_page)
+                            activeforeground='white', bd=3, command=run_user_page)
 
     pass1_entry = tk.Entry(root, font=(MAIN_FONT, 20, 'italic bold'), bd=3, bg='#15478F', fg='white', show='*',
                            insertbackground='white')
     pass2_entry = tk.Entry(root, font=(MAIN_FONT, 20, 'italic bold'), bd=3, bg='#15478F', fg='white', show='*',
                            insertbackground='white')
 
-    canvas.create_text(20, 20, text="Cyberous - Reset Password", font=(MAIN_FONT, 60, 'bold italic'), anchor=tk.NW,
+    canvas.create_text(250, 20, text="Cyberous - Reset Password", font=(MAIN_FONT, 60, 'bold italic'), anchor=tk.NW,
                        fill='white')
     canvas.create_text(x // 2, 300, text="Choose your new password", font=(MAIN_FONT, 70, 'italic bold'), fill='white')
 

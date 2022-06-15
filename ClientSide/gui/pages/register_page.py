@@ -9,11 +9,7 @@ def run_register_page():
     from login_page import run_login_page
     from authentication_page import run_auth_page
 
-    canvas.delete('all')
-    exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
-    exit_button.pack()
-    canvas.create_window(x - 24, 15, window=exit_button)
-    canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)
+    clear_window()
 
     register_username_entry = tk.Entry(root, font=(MAIN_FONT, 20, 'bold'), bd=3, bg='#15478F', fg='white',
                                        insertbackground='white')
@@ -59,7 +55,7 @@ def run_register_page():
                             activeforeground='white', bd=3, command=run_home_page)
     # back_button.pack()
 
-    canvas.create_text(20, 20, text="Cyberous - Register Page", font=(MAIN_FONT, 60, 'bold'), anchor=tk.NW,
+    canvas.create_text(250, 20, text="Cyberous - Register Page", font=(MAIN_FONT, 60, 'bold'), anchor=tk.NW,
                        fill='white')
     canvas.create_text(x // 2 + 50, 230, text="Register", font=(MAIN_FONT, 85, 'bold'), fill='white')
 

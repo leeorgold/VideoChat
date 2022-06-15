@@ -15,7 +15,7 @@ root.geometry(f"{x}x{y}")
 
 default_bg = tk.PhotoImage(file='../images/background.png')
 
-logo = tk.PhotoImage(file='../images/logo.png')
+logo = tk.PhotoImage(file='../images/new-small-logo.png')
 
 exit_button_img = tk.PhotoImage(file=r"../images/exit_button.png")
 
@@ -25,8 +25,8 @@ MAIN_FONT = 'Cascadia Mono'
 
 # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_ip = '192.168.0.107'
-# server_ip = '172.19.250.78'
+server_ip = '172.19.250.79'
+# server_ip = '192.168.0.109'
 port = 10000
 
 #
@@ -38,6 +38,15 @@ client_socket = EncryptionManger(ip=server_ip, port=port)
 
 msg_builder = MessageBuilder()
 my_username = ['']
+
+
+def clear_window():
+    canvas.delete('all')
+
+    exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
+    canvas.create_window(x - 24, 15, window=exit_button)
+    canvas.create_image(0, 0, image=default_bg, anchor=tk.NW)
+    canvas.create_image(50, 20, image=logo, anchor=tk.NW)
 
 
 def close_window():

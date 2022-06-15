@@ -58,6 +58,7 @@ while inputs:
         if s is server:
             # A "readable" server socket is ready to accept a connection
             connection, client_address = s.accept()
+            # when you get a new connection
             print(f'new connection from {client_address}')
             # connection.setblocking(False)
             inputs.append(connection)
@@ -71,6 +72,7 @@ while inputs:
                 if msg is None:
                     raise ConnectionError
 
+                # when you receive a message
                 print(f'[{s.getpeername()} -> server]: {msg!r}')
                 if msg == b'<SYMMETRIC KEY EXCHANGE>':
                     continue
@@ -101,6 +103,8 @@ while inputs:
             # print(f'output queue for {s.getpeername()} is empty')
             outputs.remove(s)
         else:
+
+            # when you send a message to a client
             print(f'[server -> {s.getpeername()}]: {next_msg!r}')
             em.encryption_dict[s].send_aes(next_msg.encode())
 
