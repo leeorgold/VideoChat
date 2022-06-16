@@ -12,12 +12,19 @@ from tkinter.messagebox import showinfo
 
 from user_page import run_user_page
 
+# constants
 BUFF_SIZE = 65536
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
 
+mic_on = tk.PhotoImage(file='../images/microphone-on.png')
+mic_off = tk.PhotoImage(file='../images/microphone-off.png')
+img_on = tk.PhotoImage(file='../images/video-on.png')
+img_off = tk.PhotoImage(file='../images/video-off.png')
+
+# variables
 camera_switch = False
 leaving = False
 general = None
@@ -25,6 +32,7 @@ recording = False
 
 
 def reset():
+    """The function resets the meeting variables."""
     global camera_switch, leaving, general, recording
 
     camera_switch = False
@@ -33,13 +41,11 @@ def reset():
     recording = False
 
 
-mic_on = tk.PhotoImage(file='../images/microphone-on.png')
-mic_off = tk.PhotoImage(file='../images/microphone-off.png')
-img_on = tk.PhotoImage(file='../images/video-on.png')
-img_off = tk.PhotoImage(file='../images/video-off.png')
-
-
 def image_connection(mode, ip=None):
+    """The function connects the two clients together on a UDP protocol.
+    :param mode: join or host. if host - listen for a client.
+                               if join - send message to the host.
+    :param ip: if mode is join, the ip specify what is the host's ip address."""
     image_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     image_udp.settimeout(3)
     if mode == 'join':
@@ -75,6 +81,7 @@ def image_connection(mode, ip=None):
 
 
 def handle_threads(mode, ip):
+    """The function handles the threads running while the video chat is active."""
     global general
 
     msg = canvas.create_text(200, y // 2 - 10, text="",
@@ -107,6 +114,7 @@ def handle_threads(mode, ip):
 
 
 def run_meeting_page(*, mode, ip=None, meeting_id=None):
+    """The function runs the meeting page."""
     global leaving
     leaving = False
     assert mode == 'join' or mode == 'host', f'Unsupported mode. {mode = }.'
@@ -114,6 +122,7 @@ def run_meeting_page(*, mode, ip=None, meeting_id=None):
     reset()
 
     def on_off_camera():
+        """The function turns on and off the user camera and changes the icon on the button."""
         global camera_switch
         if camera_switch:
             image_button.configure(image=img_off)
@@ -123,6 +132,7 @@ def run_meeting_page(*, mode, ip=None, meeting_id=None):
             camera_switch = True
 
     def change_recording():
+        """The function turns on and off the user camera and changes the icon on the button."""
         global recording
         if recording:
             recording = False
@@ -153,10 +163,12 @@ def run_meeting_page(*, mode, ip=None, meeting_id=None):
         canvas.create_text(20, 150, text=f"ID: {meeting_id}", font=('Cascadia Mono', 30, 'bold'), anchor=tk.NW,
                            fill='white')
 
+    # run handle threads as a thread
     run_thread(handle_threads, mode, ip)
 
 
 def run_thread(target, *args):
+    """gets a function and arguments. the function passes the arguments to the function and runs it as a thread"""
     t = Thread(target=target, daemon=True, args=args)
     t.start()
     return t
@@ -244,12 +256,14 @@ def image_receiver(sock: socket.socket, addr):
                 # saves a reference to the image
                 other_image_container.img = frame
         except socket.timeout:
+            # if no new data has come in 3 seconds, turn the user image off.
             other_image_container.img = None
         except OSError:
             break
 
 
 def listen_for_leaving(sock: socket.socket):
+    """The function detects when the other user disconnect and returns the user to the user page."""
     global leaving
     sock.settimeout(5)
     print('listening for leaving')
@@ -290,6 +304,7 @@ def update_photos():
 
 
 def send_status(sock: socket.socket):
+    """the function sends once in 3 seconds alive to keep the connection alive."""
     while not leaving:
         try:
             sock.send(b'alive')
@@ -304,6 +319,11 @@ def send_status(sock: socket.socket):
 
 
 def tcp_connection(*, mode=None, ip=None, port):
+    """The function connects the two clients together on a TCP protocol.
+    :param mode: join or host. if host - listen for a client.
+                               if join - send message to the host.
+    :param ip: if mode is join, the ip specify what is the host's ip address.
+    :param port: the port number to connect to."""
     if mode == 'join':
         tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         address = (ip, port)

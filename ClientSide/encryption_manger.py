@@ -11,6 +11,12 @@ with open(r'..\..\public.pem', 'rb') as f:
 
 
 class EncryptionManger:
+    """The class creates an EncryptionManger object which handles all the encryption
+    and decryption of the communications with the server over the network.
+    The class works with RSA and AES algorithms.
+    The client sends an AES key using RSA.
+    Then, all the messages are encrypted and decrypted using symmetric encryption.
+    """
     public_key = public_key
 
     def __init__(self, ip: str, port=10000):

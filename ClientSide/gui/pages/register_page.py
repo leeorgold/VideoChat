@@ -23,6 +23,7 @@ def run_register_page():
                                     insertbackground='white')
 
     def check_data():
+        """The function checks the user input."""
         username = register_username_entry.get()
         password = register_password_entry.get()
         confirm_password = register_confirm_password_entry.get()
@@ -31,29 +32,26 @@ def run_register_page():
 
         if dc.username(username) and dc.password(password, confirm_password) and dc.phone(phone_number) and dc.email(
                 email):
-            client_socket.send(msg_builder.register(username=username, password=password, phone=phone_number, email=email).encode())
+            client_socket.send(msg_builder.register(
+                username=username, password=password, phone=phone_number, email=email).encode())
             msg = client_socket.recv()
-            worked, details = msg_builder.handle_message('get_token', msg)
+            worked, details = msg_builder.handle_response('get_token', msg)
             if not worked:
                 showinfo('Failure', details)
             else:
                 my_username[0] = username
                 run_auth_page('register')
 
-    # canvas.create_image(x - 50, 20, image=logo, anchor=tk.NE)
 
     register_button = tk.Button(canvas, text="Register", font=(MAIN_FONT, 32, 'bold italic'), bg='#15478F',
                                 activebackground='#2060BD', fg='white',
                                 activeforeground='white', bd=3, command=check_data)
-    # register_button.pack()
     login_button = tk.Button(canvas, text="Login", font=(MAIN_FONT, 35, 'bold italic'), bg='#15478F',
                              activebackground='#2060BD', fg='white',
                              activeforeground='white', bd=3, command=run_login_page)
-    # back_to_login_button.pack()
     back_button = tk.Button(canvas, text="Back", font=(MAIN_FONT, 23, 'bold italic'), bg='#15478F',
                             activebackground='#2060BD', fg='white',
                             activeforeground='white', bd=3, command=run_home_page)
-    # back_button.pack()
 
     canvas.create_text(250, 20, text="Cyberous - Register Page", font=(MAIN_FONT, 60, 'bold'), anchor=tk.NW,
                        fill='white')

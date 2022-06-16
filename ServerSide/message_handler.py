@@ -38,6 +38,8 @@ def handle_message(sock, msg):
         return build_message(False, {_DETAILS: 'Some error occurred'})
 
 
+# These functions will handle the clients specific request.
+
 def register(sock, *, username, password, phone, email):
     if not (username_ok(username) and password_ok(password) and phone_ok(phone) and email_ok(email)):
         return build_message(False, {_DETAILS: 'Illegal data'})
@@ -45,16 +47,11 @@ def register(sock, *, username, password, phone, email):
     if not can[0]:
         return build_message(can[0], {_DETAILS: can[1]})
 
-    token = random_string(16, 16)
-    while token in auth_codes.keys():
-        token = random_string(16, 16)
-    auth_codes[token] = '123456'
-    # auth_codes[token] = send_code(email)
-    functions[token] = {'func': inserting_user, 'args': (username, password, phone, email)}
-    return build_message(True, {'token': token})
+    return create_token(inserting_user, username, password, phone, email)
 
 
 def search_logged_user(*, username=None, ip=None):
+    """The function search for a user by username or ip. if found, his session will be returned. else, None."""
     if username:
         for session, client in logged_users.items():
             if username == client.username:
@@ -142,11 +139,8 @@ def forgot_password(sock, username, email):
     if not Users.get_info(username=username, email=email):
         return build_message(False, {_DETAILS: 'Wrong data'})
 
-    token = unique_str(auth_codes.keys())
-    auth_codes[token] = '123456'
-    # auth_codes[token] = send_code(email)
-    functions[token] = {'func': log_user, 'args': (username, email)}
-    return build_message(True, {'token': token})
+    return create_token(log_user, username, email)
+
 
 
 def reset_password(sock, session, password):
@@ -176,7 +170,17 @@ def leave_meeting(sock, session):
     return False
 
 
+def create_token(func, *args):
+    """The function creates a one-time token for the client"""
+    token = unique_str(auth_codes.keys())
+    auth_codes[token] = '123456'
+    # auth_codes[token] = send_code(email)
+    functions[token] = {'func': func, 'args': args}
+    return build_message(True, {'token': token})
 
+
+# white request list. only these functions will be handled.
+# key: opcode. value: the matching function
 _valid_requests = {
     'register': register,
     'login': login,
@@ -189,6 +193,8 @@ _valid_requests = {
     'leave_meeting': leave_meeting
 }
 
+
+# these functions check validity
 
 def username_ok(username: str):
     return 3 < len(username) < 21 and username.isalnum() and username.isascii() and not username.isdigit()
@@ -208,6 +214,10 @@ def email_ok(email: str):
 
 
 def build_message(status, parameters):
+    """The function builds the message according to the protocol.
+    :param status - bool. the operation was successful or not.
+    :param parameters - dict. the parameters needed for the message.
+    """
     msg = json.dumps(
         {
             'status': status,
@@ -218,16 +228,9 @@ def build_message(status, parameters):
 
 
 def unique_str(iterable):
+    """The function gets an iterable and returns a random string which does not present in the iterable"""
     st = random_string(16, 16)
     while st in iterable:
         st = random_string(16, 16)
     return st
 
-# print(handle_message(
-#     '{"request": "register", '
-#     '"parameters": {"username": "user1", "password": "pass1", "phone": "0551234567", "email": "email12@gmail.com"}}'
-# ))
-# print(handle_message(
-#     '{"request": "login", '
-#     '"parameters": {"username": "user1", "password": "pass1"}}'
-# ))

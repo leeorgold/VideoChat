@@ -7,12 +7,20 @@ import os
 
 
 class EncryptionManger:
+    """The class creates an EncryptionManger object which handles all the encryption
+    and decryption of the communications with a client over the network.
+    The class works with RSA and AES algorithms.
+    The server receives an AES key using RSA.
+    Then, all the messages are encrypted and decrypted using symmetric encryption.
+    """
+
     def __init__(self, sock):
         self.sock = sock
         self.aes_key = None
         self.private_key = rsa.PrivateKey.load_pkcs1(os.getenv('PRIVATE_KEY').encode())
 
     def recv(self):
+        """Handles receiving messages."""
         if self.aes_key is None:
             self.aes_key = self.recv_rsa()
             return b'<SYMMETRIC KEY EXCHANGE>'
@@ -32,7 +40,6 @@ class EncryptionManger:
             return self._aes_decryption(msg)
         # except (ValueError, BlockingIOError) as e:
         except (ValueError,) as e:
-            print(e)
             return None
 
     def send_aes(self, data: bytes) -> None:

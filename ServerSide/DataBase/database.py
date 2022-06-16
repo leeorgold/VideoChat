@@ -120,6 +120,8 @@ class Users:
 
     @classmethod
     def get_search_query(cls, **kwargs):
+        """The function gets kwargs and returns a query string contains all the keyword arguments with the operator
+        AND."""
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         assert bool(kwargs), "No data was given"
 
@@ -145,24 +147,6 @@ class Users:
             return True, ''
         return False, 'wrong password'
 
-    # @classmethod
-    # def set_session(cls, username, clear=False):
-    #     conn = sqlite3.connect(FILE_PATH)
-    #     query = f"UPDATE {cls.__tableName} SET {cls.__session} = ? WHERE {cls.__username} = ?;"
-    #     session = None if clear else cls.get_new_session()
-    #     conn.execute(query, (session, username))
-    #     conn.commit()
-    #     conn.close()
-    #     return session
-
-    # @classmethod
-    # def get_new_session(cls):
-    #     session = random_string(16, 16)
-    #     conn = sqlite3.connect(FILE_PATH)
-    #     query = f"SELECT * FROM {cls.__tableName} WHERE {cls.__session} = ?;"
-    #     while conn.execute(query, (session,)).fetchone():
-    #         session = random_string(16, 16)
-    #     return session
 
     @classmethod
     def get_email(cls, username):
@@ -176,15 +160,6 @@ def random_string(a, b):
 
 
 def main():
-    # print(Users.insert_user('user1', 'pass1', '0551234567', 'email12@gmail.com'))
-    # print(Users.get_info(username='user1'))
-    # print(Users.try_login('user1', 'pass1'))
-    # Users.update_user_password_by_username('user1', 'pass1')
-    # print(Users.get_info(phone_number='user1'))
-    # print(Users.try_login('user1', 'pass1'))
-    # print(Users.try_login('user3', 'pass3'))
-    # print(Users.get_search_query(username='user', phone_number='email'))
-    # Users.set_session('user1', True)
     print(Users.get_email('user1'))
 
 

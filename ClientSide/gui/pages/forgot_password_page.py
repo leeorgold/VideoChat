@@ -13,13 +13,14 @@ def run_forgot_password_page():
     clear_window()
 
     def check_data():
+        """The function checks the user input."""
         username = username_entry.get()
         email = email_entry.get()
 
         if dc.username(username) and dc.email(email):
             client_socket.send(msg_builder.forgot_password(username=username, email=email).encode())
             msg = client_socket.recv()
-            worked, details = msg_builder.handle_message('get_token', msg)
+            worked, details = msg_builder.handle_response('get_token', msg)
             if not worked:
                 showinfo('Failure', details)
             else:

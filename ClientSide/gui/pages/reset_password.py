@@ -5,20 +5,20 @@ from tkinter.messagebox import showinfo
 
 
 def run_reset_password_page():
-    from home_page import run_home_page
     from user_page import run_user_page
     from authentication_page import run_auth_page
 
     clear_window()
 
     def check_data():
+        """The function checks the user input."""
         pass1 = pass1_entry.get()
         pass2 = pass2_entry.get()
 
         if dc.password(pass1, pass2):
             client_socket.send(msg_builder.reset_password(password=pass1).encode())
             msg = client_socket.recv()
-            worked, details = msg_builder.handle_message('get_token', msg)
+            worked, details = msg_builder.handle_response('get_token', msg)
             if not worked:
                 showinfo('Failure', details)
             else:
@@ -54,5 +54,4 @@ def run_reset_password_page():
 
 
 if __name__ == "__main__":
-    from welcome_page import run_welcome_page
-    run_welcome_page()
+    run_reset_password_page()

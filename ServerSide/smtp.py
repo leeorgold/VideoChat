@@ -2,7 +2,6 @@ import os
 import smtplib
 from email.message import EmailMessage
 import random
-# from dotenv import load_dotenv
 
 
 
@@ -10,13 +9,17 @@ def get_6_digit_code():
     return str(random.randrange(1_000_000)).zfill(6)
 
 
-def send_code(to: str):
+def send_code(email: str):
+    """The function gets an email address and sends it an authentication code.
+    The function does not check the emails' validity.
+    :param email - str. email address to send the code.
+    :return auth - the authentication code sent
+    """
     port = 587  # For starttls
     smtp_server = "smtp.office365.com"
 
-    email_address = "cyberous@outlook.co.il"
-    email_password = os.getenv('EMAIL_PASSWORD')
-    print(email_password)
+    cyberous_address = "cyberous@outlook.co.il"
+    cyberous_password = os.getenv('EMAIL_PASSWORD')
 
     msg = EmailMessage()
     auth = get_6_digit_code()
@@ -25,18 +28,18 @@ def send_code(to: str):
     msg.set_content(message)
 
     msg['Subject'] = "cyberous - authentication code"
-    msg['From'] = email_address
-    msg['To'] = to
+    msg['From'] = cyberous_address
+    msg['To'] = email
 
 
     # manages a connection to an SMTP server
     server = smtplib.SMTP(host=smtp_server, port=port)
 
-    # connect to the SMTP server as TLS mode ( for security )
+    # connect to the SMTP server as TLS mode (for security)
     server.starttls()
 
     # login to the email account
-    server.login(email_address, email_password)
+    server.login(cyberous_address, cyberous_password)
 
     # send the actual message
     server.send_message(msg)

@@ -3,6 +3,11 @@ import re
 
 
 class DataChecker:
+    """The class is used to check the data the user has passed.
+    If the data is invalid, a message will show up.
+    If the data is valid, the class will allow it to be passed on
+    to the next level on its way to the server.
+    """
 
     @classmethod
     def username(cls, username: str):
@@ -92,7 +97,3 @@ class DataChecker:
             msgbox.showwarning('Invalid ID', 'Meeting IDs must contain english letters only')
             return False
         return True
-
-
-# print(DataChecker.email('gold.leeor2004@gmail.com'))
-# print(DataChecker.email('leeorgo129@amirim.edum.org.il'))

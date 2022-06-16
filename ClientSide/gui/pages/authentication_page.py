@@ -13,12 +13,13 @@ def run_auth_page(mode):
     clear_window()
 
     def check_data():
+        """The function checks the user input."""
         code = auth_entry.get()
 
         if dc.auth_code(code):
             client_socket.send(msg_builder.authenticate(code).encode())
             msg = client_socket.recv()
-            worked, details = msg_builder.handle_message('authenticate', msg)
+            worked, details = msg_builder.handle_response('authenticate', msg)
             if not worked:
                 showinfo('Failure', details)
                 my_username[0] = ''
@@ -28,9 +29,10 @@ def run_auth_page(mode):
                     run_forgot_password_page()
                 elif mode == 'reset_password':
                     run_forgot_password_page()
-            elif mode == 'reset_password':
-                showinfo('Success', 'Password changed successfully.')
-            run_user_page()
+            else:
+                if mode == 'reset_password':
+                    showinfo('Success', 'Password changed successfully.')
+                run_user_page()
 
     auth_button = tk.Button(canvas, text="authenticate", font=(MAIN_FONT, 32, 'bold italic'), bg='#15478F',
                              activebackground='#2060BD', fg='white',

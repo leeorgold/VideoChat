@@ -14,13 +14,14 @@ def run_login_page():
     clear_window()
 
     def check_data():
+        """The function checks the user input."""
         username = login_username_entry.get()
         password = login_password_entry.get()
 
         if dc.username(username) and dc.password(password):
             client_socket.send(msg_builder.login(username=username, password=password).encode())
             msg = client_socket.recv()
-            worked, details = msg_builder.handle_message('login', msg)
+            worked, details = msg_builder.handle_response('login', msg)
             if not worked:
                 showinfo('Failure', details)
             else:

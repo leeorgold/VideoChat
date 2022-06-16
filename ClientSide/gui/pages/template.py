@@ -1,9 +1,11 @@
 import tkinter as tk
 # from PIL import Image, ImageTk
-import socket
+# import socket
 from ClientSide.message_builder import MessageBuilder
 from ClientSide.encryption_manger import EncryptionManger
 
+
+# build the application screen
 root = tk.Tk()
 root.title('cyberous')
 root.attributes('-fullscreen', True)
@@ -13,34 +15,35 @@ x = 1920
 y = 1080
 root.geometry(f"{x}x{y}")
 
-default_bg = tk.PhotoImage(file='../images/background.png')
-
-logo = tk.PhotoImage(file='../images/new-small-logo.png')
-
-exit_button_img = tk.PhotoImage(file=r"../images/exit_button.png")
-
+# build a canvas. on the canvas the gui is drawn.
 canvas = tk.Canvas(root, height=y, width=x)
 canvas.pack()
-MAIN_FONT = 'Cascadia Mono'
-
-# client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server_ip = '172.19.250.79'
-# server_ip = '192.168.0.109'
-port = 10000
-
-#
-# client_socket.connect((host_ip, port))  # a tuple
-client_socket = EncryptionManger(ip=server_ip, port=port)
 
 
-# reset_encryption_manager()
-
-msg_builder = MessageBuilder()
+# build objects that are in used in the pages
+default_bg = tk.PhotoImage(file='../images/background.png')
+logo = tk.PhotoImage(file='../images/new-small-logo.png')
+exit_button_img = tk.PhotoImage(file=r"../images/exit_button.png")
 my_username = ['']
 
+# declae the main font name.
+MAIN_FONT = 'Cascadia Mono'
+
+# server_ip = '172.19.250.79'
+server_ip = '192.168.0.109'
+port = 10000
+
+# create a EncryptionManger object.
+client_socket = EncryptionManger(ip=server_ip, port=port)
+msg_builder = MessageBuilder()
+
+
+# define function for different activities on the application
 
 def clear_window():
+    """The function deletes all the items from the canvas.
+     Once the canvas is cleared, the basic drawing is done.
+     Basic drawing contains background image, X button and a logo."""
     canvas.delete('all')
 
     exit_button = tk.Button(canvas, image=exit_button_img, command=close_window, bd=0)
@@ -50,6 +53,7 @@ def clear_window():
 
 
 def close_window():
+    """The function try to inform the server about leaving before destroying the application."""
     try:
         client_socket.send(msg_builder.logout().encode())
     except ConnectionError:
@@ -57,8 +61,6 @@ def close_window():
     root.destroy()
 
 
+# set the closing window function to the custom close window declared above.
 root.protocol('WM_DELETE_WINDOW', close_window)
 
-
-def foo():
-    pass

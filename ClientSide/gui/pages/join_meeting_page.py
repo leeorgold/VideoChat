@@ -11,13 +11,14 @@ def run_join_meeting_page():
     clear_window()
 
     def check_data():
+        """The function checks the user input."""
         meeting_id = meeting_id_entry.get()
         password = meeting_password_entry.get()
 
         if dc.meeting_id(meeting_id) and dc.password(password):
             client_socket.send(msg_builder.join_meeting(meeting_id=meeting_id, password=password).encode())
             msg = client_socket.recv()
-            worked, details = msg_builder.handle_message('join_meeting', msg)
+            worked, details = msg_builder.handle_response('join_meeting', msg)
             if not worked:
                 showinfo('Failure', details)
             else:
